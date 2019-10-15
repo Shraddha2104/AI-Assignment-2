@@ -1,15 +1,12 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <map>
 #include <vector>
-#include <queue>
-#include <stack>
 #include <algorithm>
-#include <unordered_map>
 #include <set>
 #include <climits>
 #include <chrono>
+#include <float.h>
 
 using namespace std;
 using namespace std::chrono; 
@@ -20,98 +17,111 @@ public:
 	Point():x(0),y(0) {}
 	Point(int x, int y):x(x),y(y) {}
 };
-vector<Point> greenCorner;
-vector<Point> redCorner;
-vector<Point> previous_spots;
-vector<Point> moves;
+
+
 //black-2 white-1
-class State {
+class Board {
 public:
 	vector<vector<char> > board;
-	
-	int row=board.size(), column= board[0].size();
-	
+	//vector<vector<int> > board( 16 , vector<int> (16,'*')); 
+	int row=16, column= 16;
+	vector<Point> greenCorner;
+	vector<Point> redCorner;
 
-};
-class Node{
-		// self.board = board
-  //       self.type = type
-  //       self.player = player
-  //       self.to_explore = True
-  //       self.node_value = 0
-  //       self.node_depth = node_depth
-  //       self.move = 0
-
-  //       self.children = []
-	public:
-		int player;
-		int node_depth;
-		int node_value;
-		vector<Point> children;
-};
-
-int distance(Point p1, Point p2)
+vector<bool> detectWin()
 {
-	return (p1.x-p2.x)*(p1.x-p2.x)+(p1.x-p2.y)*(p1.x-p2.y);
-}
+	vector<bool> winCheckArray(2);
+	bool redWin=false, greenWin=false;
+	int x,y;
 
+	//checking if all tiles in green corner are filled with red tiles
+	for(auto coord: greenCorner)
+	{
+		x=coord.x;
+		y=coord.y;
+		if(board[x][y]=='*' || board[x][y]=='R'){
+			redWin=false;
+			break;
+		}
+
+		else if(board[x][y]=='G')
+			redWin=true;
+
+	}
+	for(auto coord: redCorner)
+	{
+		x=coord.x;
+		y=coord.y;
+		if(board[x][y]=='*' || board[x][y]=='G'){
+			greenWin=false;
+			break;
+		}
+
+		else if(board[x][y]=='R')
+			greenWin=true;
+
+	}
+	winCheckArray[0]=redWin;
+	winCheckArray[1]=greenWin;
+	return winCheckArray;
+
+}
 int switchTurn(int turn)
 {
 	if(turn==1)
-		turn=2;
+		return 2;
 
 	else
-		turn=1;
+		return 1;
 
-	return turn;
 }
+
 void getRedCorner()
 {
-	for(int i=0;i<8;i++)
-	{
-		for(int j=0;j<8-i;j++)
-			redCorner.push_back(Point(i,j));
-		
-	}
+	redCorner.push_back(Point(11,14));
+	redCorner.push_back(Point(11,15));
+	redCorner.push_back(Point(12,13));
+	redCorner.push_back(Point(12,14));
+	redCorner.push_back(Point(12,15));
+	redCorner.push_back(Point(13,12));
+	redCorner.push_back(Point(13,13));
+	redCorner.push_back(Point(13,14));
+	redCorner.push_back(Point(13,15));
+	redCorner.push_back(Point(14,11));
+	redCorner.push_back(Point(14,12));
+	redCorner.push_back(Point(14,13));
+	redCorner.push_back(Point(14,14));
+	redCorner.push_back(Point(14,15));
+	redCorner.push_back(Point(15,11));
+	redCorner.push_back(Point(15,12));
+	redCorner.push_back(Point(15,13));
+	redCorner.push_back(Point(15,14));
+	redCorner.push_back(Point(15,15));
 }
 void getGreenCorner()
 {
-	// for i in range(0, size):
- //            cur_row = (size * 2) - (size - i)
- //            start_col = size * 2 - 1 - i
- //            end_col = size * 2
- //            for col in range(start_col, end_col):
- //                self.greenCorner.append((cur_row, col))
-	int cur_row,start_col,end_col=32;
+	greenCorner.push_back(Point(0,0));
+	greenCorner.push_back(Point(0,1));
+	greenCorner.push_back(Point(0,2));
+	greenCorner.push_back(Point(0,3));
+	greenCorner.push_back(Point(0,4));
+	greenCorner.push_back(Point(1,0));
+	greenCorner.push_back(Point(1,1));
+	greenCorner.push_back(Point(1,2));
+	greenCorner.push_back(Point(1,3));
+	greenCorner.push_back(Point(1,4));
+	greenCorner.push_back(Point(2,0));
+	greenCorner.push_back(Point(2,1));
+	greenCorner.push_back(Point(2,2));
+	greenCorner.push_back(Point(2,3));
+	greenCorner.push_back(Point(3,0));
+	greenCorner.push_back(Point(3,1));
+	greenCorner.push_back(Point(3,2));
+	greenCorner.push_back(Point(4,0));
+	greenCorner.push_back(Point(4,1));
+}
 
-    for(int i=0;i<16;i++)
-    {
-    	cur_row=32-(16-i);
-    	start_col= 32-1-i;
-    	
-    	for(int j=start_col;j<end_col;j++)
-    		greenCorner.push_back({cur_row,j});
-    }
-}
-char removePieceAt(Point p,State state)
-{
-	char p1=state.board[p.x][p.y];
-	state.board[p.x][p.y]='*';
-	return p1;
-}
-void placePieceAt(Point p,State state)
-{
-
-}
-void movePieceTo(Point p, State state)
-{
-
-}
-char getPieceAt(Point p,State state)
-{
-	return state.board[p.x][p.y];
-}
-vector<Point> getGreenPosition(State state)
+vector<Point> getGreenPosition()
 {
 	vector<Point> green_pos_list;
 
@@ -119,20 +129,20 @@ vector<Point> getGreenPosition(State state)
     {
     	for(int j=0;j<16;j++)
     	{
-    		if(state.board[i][j]=='G')
+    		if(board[i][j]=='G')
     			green_pos_list.push_back(Point(i,j));
     	}
     }
     return green_pos_list;
 }
-vector<Point> getRedPosition(State state)
+vector<Point> getRedPosition()
 {
 	vector<Point> red_pos_list;
 	for(int i=0;i<16;i++)
     {
     	for(int j=0;j<16;j++)
     	{
-    		if(state.board[i][j]=='R')
+    		if(board[i][j]=='R')
     			red_pos_list.push_back(Point(i,j));
     	}
     }
@@ -147,15 +157,7 @@ bool find_redCorner(Point p)
 	}
 	return false;
 }
-bool find_PrevCorner(Point p)
-{
-	for(auto point:previous_spots)
-	{
-		if((point.x==p.x) && (point.y==p.y))
-			return true;
-	}
-	return false;
-}
+
 bool find_greenCorner(Point p)
 {
 	for(auto point:greenCorner)
@@ -165,127 +167,79 @@ bool find_greenCorner(Point p)
 	}
 	return false;
 }
-void clear_moves()
-	moves.clear();
-	
-void printBoard(State state)
+char removePieceAt(Point p)
 {
-	for(int i=0;i<state.board.size();i++)
-	{
-		for(int j=0;j<state.board[0].size();j++)
-			cout<<state.board[i][j];
-	}
+	char p1=board[p.x][p.y];
+	board[p.x][p.y]='*';
+	return p1;
 }
-vector<bool> detectWin(State state)
+void placePieceAt(Point p)
 {
-	vector<bool> winCheckArray(2);
-	bool redWin=false, greenWin=false;
-	int x,y;
-
-	//checking if all tiles in green corner are filled with red tiles
-	for(auto coord: greenCorner)
-	{
-		x=coord.x;
-		y=coord.y;
-		if(state.board[x][y]=='*' || state.board[x][y]=='R'){
-			redWin=false;
-			break;
-		}
-
-		else if(state.board[x][y]=='G')
-			redWin=true;
-
-	}
-	for(auto coord: redCorner)
-	{
-		x=coord.x;
-		y=coord.y;
-		if(state.board[x][y]=='*' || state.board[x][y]=='G'){
-			greenWin=false;
-			break;
-		}
-
-		else if(state.board[x][y]=='R')
-			greenWin=true;
-
-	}
-	winCheckArray[0]=redWin;
-	winCheckArray[1]=greenWin;
-	return winCheckArray;
-
 
 }
-int eval_function(State state, Node node)
+void movePieceTo(Point p)
 {
 
-	int red,green=0,value=0;
-	vector<int> distanceList;
-	vector<bool> winCheck(2);
-	winCheck=detectWin(state);
-
-	for(int i=0;i<state.board.size();i++)
+}
+char getPieceAt(Point p)
+{
+	return board[p.x][p.y];
+}
+void printBoard()
+{
+	for(int i=0;i<board.size();i++)
 	{
-		for(int j=0;j<state.board[0].size();j++)
-		{
-			char piece=state.board[i][j];
-			Point p(i,j);
-			if(piece=='G')
-			{
-				for(auto point: redCorner)
-				{
-					if(state.board[point.x][point.y]!='G'){
-						distanceList.push_back(distance(p,point));
-
-					}
-				}
-				if(distanceList.empty())
-					green=-100;
-
-				else
-					green=*max_element(distanceList.begin(), distanceList.end());
-
-
-			}
-			else if(piece=='R')
-			{
-				for(auto point: greenCorner)
-				{
-					if(state.board[point.x][point.y]!='R'){
-						distanceList.push_back(distance(p,point));
-
-					}
-				}
-				if(distanceList.empty())
-					red=-100;
-
-				else
-					red=*max_element(distanceList.begin(), distanceList.end());
-
-
-			}
-			
-
-
-		}
+		for(int j=0;j<board[0].size();j++)
+			cout<<board[i][j];
 	}
-	if(node.player==1)
-		value = red/green;
-
-	else
-        value = green/red;
-
-    if (winCheck[0])
-        value = INT_MAX;
-
-    else if(winCheck[1])
-        value = INT_MAX;
-
-    return value;
+}
+};
+class Node{
+	public:
+		int player;
+		int node_depth;
+		int to_explore;
+		int node_value;
+		Board board;
+		vector<Point> children;
 
 
+};
+class Moves
+{
+public:
+	Point source;
+	Point destination;
+	Node node;
+
+	Moves() {}
+};
+
+
+
+class Player
+{
+public:
+	vector<Point> previous_spots;
+	vector<Point> moves;
+	int start;
+	int end;
+	int run_time;
+int distance(Point p1, Point p2)
+{
+	return (p1.x-p2.x)*(p1.x-p2.x)+(p1.x-p2.y)*(p1.x-p2.y);
+}
+bool find_PrevCorner(Point p)
+{
+	for(auto point:previous_spots)
+	{
+		if((point.x==p.x) && (point.y==p.y))
+			return true;
+	}
+	return false;
 }
 //recursive function to get jump chains for a specific position
-vector<Point> jump_search(Point pt,State state)
+vector<Point> jump_search(Point pt,Board board)
 {
 	
 	vector<int> row_offsets={-1,0,1};
@@ -299,7 +253,7 @@ vector<Point> jump_search(Point pt,State state)
 		for(auto col_offset: col_offsets)
 		{
 			//out of bounds
-			if(((x+row_offset)>=state.board.size()) or ((y+col_offset)< state.board[0].size()))
+			if(((x+row_offset)>=board.board.size()) or ((y+col_offset)< board.board[0].size()))
 				continue;
 
 			//if it is out of bounds
@@ -311,46 +265,50 @@ vector<Point> jump_search(Point pt,State state)
                 continue;
 
             //check if position at offset is filled
-            if (state.board[x + row_offset][y + col_offset] != '*')
+            if (board.board[x + row_offset][y + col_offset] != '*')
             {
                    // if it is, check the position past it to see if it is empty.
                    // Do this by doubling the x and y offsets and checking that position
                     row_jump_offset = x + 2*row_offset;
                     col_jump_offset = y + 2*col_offset;
 
-                    if (((row_jump_offset) >= state.board.size()) or ((col_jump_offset) >= state.board[0].size()))
+                    if (((row_jump_offset) >= board.board.size()) or ((col_jump_offset) >= board.board[0].size()))
                         continue;
 
                     if ((row_jump_offset) < 0 or (col_jump_offset) < 0)
                         continue;
 
 
-                    if (state.board[row_jump_offset][col_jump_offset] == '*' and !find_PrevCorner(Point(row_jump_offset,col_jump_offset )))
+                    if (board.board[row_jump_offset][col_jump_offset] == '*' and !find_PrevCorner(Point(row_jump_offset,col_jump_offset )))
                     {
                     	Point p(row_jump_offset,col_jump_offset);
-		            	if(state.board[x][y]=='R')
+		            	if(board.board[x][y]=='R')
 		            	{
 		            		
-		            		if (!find_redCorner(pt))
-		            			if(find_redCorner(p))
+		            		if (!board.find_redCorner(pt))
+		            			if(board.find_redCorner(p))
 		            				continue;
 
 
 		            	}
-		            	if(state.board[x][y]=='G')
+		            	if(board.board[x][y]=='G')
 		            	{
 		            		
-		            		if (!find_greenCorner(pt))
-		            			if(find_greenCorner(p))
+		            		if (!board.find_greenCorner(pt))
+		            			if(board.find_greenCorner(p))
 		            				continue;
 
 		            			
 		            	}
 		            	previous_spots.push_back(pt);
 		            	jumps.push_back(p);
-		            	vector<Point> st=jump_search(Point(row_jump_offset, col_jump_offset), state);
+		            	vector<Point> st=jump_search(Point(row_jump_offset, col_jump_offset), board);
 						for(auto element: st)
 							jumps.push_back(element);
+
+						for(auto ele:st)
+							moves.push_back(ele);
+
 
                     }
 
@@ -361,14 +319,8 @@ vector<Point> jump_search(Point pt,State state)
 	return jumps;
 }
 
-bool compare(Point p1, Point p2)
-{
-	if((p1.x==p2.x) && (p1.y==p2.y))
-		return true;
-	return false;
-}
 //function to check 8-directionally available spaces
-vector<Point> step_search(State state, Point pt)
+vector<Point> step_search(Board board, Point pt)
 {
 
 	int x=pt.x,y=pt.y;
@@ -376,14 +328,14 @@ vector<Point> step_search(State state, Point pt)
 	vector<int> col_offsets={-1,0,1};
 	vector<Point> legal_moves;
 
-	if(x>=state.row or y>=state.column)
+	if(x>=board.row or y>=board.column)
 		return legal_moves;
 
 	if(x<0 or y<0)
 		return legal_moves;
 
 	//no piece at that position
-	if(state.board[x][y]==0)
+	if(board.board[x][y]==0)
 		return legal_moves;
 
 	for(auto row_offset: row_offsets)
@@ -391,7 +343,7 @@ vector<Point> step_search(State state, Point pt)
 		for(auto col_offset: col_offsets)
 		{
 			//out of bounds
-			if(((x+row_offset)>=state.row) or ((y+col_offset)< state.column))
+			if(((x+row_offset)>=board.row) or ((y+col_offset)< board.column))
 				continue;
 
 			//out of bounds
@@ -403,23 +355,23 @@ vector<Point> step_search(State state, Point pt)
                 continue;
 
             //Check if the position at the offset is filled
-            if (state.board[x + row_offset][y + col_offset] == '*')
+            if (board.board[x + row_offset][y + col_offset] == '*')
             {
             	Point p(x + row_offset,y + col_offset);
-            	if(state.board[x][y]=='R')
+            	if(board.board[x][y]=='R')
             	{
             		
-            		if (!find_redCorner(pt))
-            			if(find_redCorner(p))
+            		if (!board.find_redCorner(pt))
+            			if(board.find_redCorner(p))
             				continue;
 
 
             	}
-            	if(state.board[x][y]=='G')
+            	if(board.board[x][y]=='G')
             	{
             		
-            		if (!find_greenCorner(pt))
-            			if(find_greenCorner(p))
+            		if (!board.find_greenCorner(pt))
+            			if(board.find_greenCorner(p))
             				continue;
 
             			
@@ -429,25 +381,174 @@ vector<Point> step_search(State state, Point pt)
             }
             
 
+
 		}
 	}
-		vector<Point> st=jump_search(Point(x, y), state);
-		for(auto element: st)
-			legal_moves.push_back(element);
-		return legal_moves;
+	vector<Point> st=jump_search(Point(x, y), board);
+	for(auto element: st)
+		legal_moves.push_back(element);
+
+	for(auto ele: st)
+		moves.push_back(ele);
+
+	return legal_moves;
 
 
 }
-void max_value(State state,int alpha, int beta,Node node)
+double eval_function(Node node)
 {
-	auto wincheck=detectWin(state);
-	// if(winCheck[0]==true or winCheck[1]==true or node.node_depth<=0 or end-start>timeLimit)
-	// {
-	// 	int eval_score=eval_function(state,node);
+
+	Board board=node.board;
+	int red,green=0;
+	double value=0;
+	vector<int> distanceList;
+	vector<bool> winCheck(2);
+	winCheck=board.detectWin();
+
+	for(int i=0;i<16;i++)
+	{
+		for(int j=0;j<16;j++)
+		{
+			char piece=board.board[i][j];
+			Point p(i,j);
+			if(piece=='G')
+			{
+				for(auto point: board.redCorner)
+				{
+					if(board.board[point.x][point.y]!='G'){
+						distanceList.push_back(distance(p,point));
+
+					}
+				}
+				if(distanceList.empty())
+					green=-100;
+
+				else{
+					int t=*max_element(distanceList.begin(), distanceList.end());
+					green+=t;
+				}
 
 
-	// }
+			}
+			else if(piece=='R')
+			{
+				for(auto point: board.greenCorner)
+				{
+					if(board.board[point.x][point.y]!='R'){
+						distanceList.push_back(distance(p,point));
+
+					}
+				}
+				if(distanceList.empty())
+					red=-100;
+
+				else{
+					int t=*max_element(distanceList.begin(), distanceList.end());
+					red+=t;
+				}
+
+
+			}
+			
+
+
+		}
+	}
+	if(node.player==1)
+		value = (double)red/green;
+
+	else
+        value = (double)green/red;
+
+    if (winCheck[0])
+        value = DBL_MAX;
+
+    else if(winCheck[1])
+        value = DBL_MAX;
+
+    return value;
+
+
 }
+
+// Moves max_value(Board board,int alpha, int beta, Node node)
+// {
+// 	auto wincheck=detectWin(board);
+// 	Moves best_move=NULL;
+// 	if(winCheck[0]==true or winCheck[1]==true or node.node_depth<=0 or end-start>run_time)
+// 	{
+// 		node.node_value eval_score=eval_function(board,node);
+// 		return Moves(node,best_move);
+
+// 	}
+// 	if(node.player == 1)
+//         Vector<Point> player_positions = board.get_green_positions();
+//     else if(player == 2)
+//         Vector<Point> player_positions = board.get_red_positions();
+
+//     double value=DBL_MIN;
+
+//     for(auto p:player_positions)
+//     {
+//     	auto legal_moves=step_search(board,Point(p.x,p.y));
+//     	if(legal_moves.size()==0)
+//     		continue;
+
+//     	for(auto legal_move:legal_moves)
+//     	{
+//     		auto end = high_resolution_clock::now(); 
+//     		if(end-start>timeLimit)
+//     		{
+//     			best_move=
+//     		}
+
+
+//     	}
+
+//     }
+
+// }
+// void alphaBetaMinimax(Node node)
+// {
+// // 	// def alphaBetaMinimax(self, node):
+// //  //        self.start = time.time()
+// //  //        max_node, best_move = self.maxValue(node, float("-inf"), float("inf"))
+// //  //        data_board = node.get_board()
+// //  //        data_board.move_piece(best_move[0], best_move[1])
+// //  //        print("Took", self.end - self.start, "seconds to choose a move.")
+// //  //        print("Pruned", self.prunes, "branches.")
+// //  //        print("Generated", self.boards, "boards.")
+// //  //        self.prunes = 0
+// //  //        self.boards = 0
+// //  //        data_board.chosenMove = best_move
+// //  //        data_board.changeTurn()
+// //  //        return max_node, best_move
+// //  //        # return the action to do from the state
+
+// 	auto start = high_resolution_clock::now(); 
+// 	Moves m =maxValue(node, DBL_MIN, DBL_MAX);
+// 	Node max_node=m.node;
+// 	Point source=m.source;
+// 	Point destination=m.destination;
+// 	data_board=max_node.board;
+// 	move_piece(source, destination);
+// 	switchTurn();
+// 	return m;
+// }
+
+void clear_moves(){
+	moves.clear();
+}
+
+
+
+};
+
+
+
+
+
+
 int main()
 {
 	string game_type, my_color;
@@ -460,11 +561,11 @@ int main()
     fin.open("input.txt");
 
     fin>>game_type>>my_color>>play_time;
-    State state;
+    Board board;
 
     for (int i = 0; i < 16; i++) 
         for (int j = 0; j < 16; j++)
-            fin>> state.board[i][j];
+            fin>> board.board[i][j];
 
 
 
