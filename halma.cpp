@@ -23,10 +23,27 @@ public:
 class Board {
 public:
 	vector<vector<char> > board;
-	//vector<vector<int> > board( 16 , vector<int> (16,'*')); 
-	int row=16, column= 16;
 	vector<Point> greenCorner;
 	vector<Point> redCorner;
+	int turn =2;
+	Board() {
+		board.resize(16);
+
+		for (int i = 0; i < 16; ++i)	
+			board[i].resize(16);
+	}
+
+	Board(vector<vector<char>> dup_board) { 
+		board = dup_board;
+		greenCorner = getGreenCorner();
+		redCorner = getRedCorner();
+	}
+	Board(const Board &bref) 
+	{
+		board = bref.board;
+		greenCorner = bref.greenCorner;
+		redCorner = bref.redCorner;
+	}
 
 vector<bool> detectWin()
 {
@@ -66,17 +83,17 @@ vector<bool> detectWin()
 	return winCheckArray;
 
 }
-int switchTurn(int turn)
+void switchTurn()
 {
 	if(turn==1)
-		return 2;
+		turn= 2;
 
 	else
-		return 1;
+		turn= 1;
 
 }
 
-void getRedCorner()
+vector<Point> getRedCorner()
 {
 	redCorner.push_back(Point(11,14));
 	redCorner.push_back(Point(11,15));
@@ -97,8 +114,9 @@ void getRedCorner()
 	redCorner.push_back(Point(15,13));
 	redCorner.push_back(Point(15,14));
 	redCorner.push_back(Point(15,15));
+	return redCorner;
 }
-void getGreenCorner()
+vector<Point> getGreenCorner()
 {
 	greenCorner.push_back(Point(0,0));
 	greenCorner.push_back(Point(0,1));
@@ -119,6 +137,7 @@ void getGreenCorner()
 	greenCorner.push_back(Point(3,2));
 	greenCorner.push_back(Point(4,0));
 	greenCorner.push_back(Point(4,1));
+	return greenCorner;
 }
 
 vector<Point> getGreenPosition()
@@ -167,20 +186,22 @@ bool find_greenCorner(Point p)
 	}
 	return false;
 }
-char removePieceAt(Point p)
+char remove_piece_at(Point p)
 {
 	char p1=board[p.x][p.y];
 	board[p.x][p.y]='*';
 	return p1;
 }
-void placePieceAt(Point p)
-{
+//Move a piece from one position to another on the data board
+void move_piece(Point start_pos,Point end_pos){
 
+	char player = remove_piece_at(start_pos);
+    place_piece(player, end_pos);
 }
-void movePieceTo(Point p)
+void place_piece(char player,Point pt) 
 {
-
-}
+	board[pt.x][pt.y]=player;
+}      
 char getPieceAt(Point p)
 {
 	return board[p.x][p.y];
@@ -198,11 +219,13 @@ class Node{
 	public:
 		int player;
 		int node_depth;
-		int to_explore;
-		int node_value;
+		bool to_explore;
+		double node_value;
 		Board board;
+		int move;
 		vector<Point> children;
 
+		Node(int p, Board b, int nd): player(p), board(b), node_depth(nd) {}
 
 };
 class Moves
@@ -210,11 +233,16 @@ class Moves
 public:
 	Point source;
 	Point destination;
-	Node node;
-
+	Moves(Point s, Point d): source(s), destination(d) {}
 	Moves() {}
 };
-
+class Node_Action
+{
+public:
+	Node node;
+	Moves m;
+	Node_Action(Node n, Moves m): node(n), m(m) {}
+};
 
 
 class Player
@@ -222,9 +250,13 @@ class Player
 public:
 	vector<Point> previous_spots;
 	vector<Point> moves;
-	int start;
-	int end;
-	int run_time;
+	//long int start=0;
+	//long int end=0;
+	high_resolution_clock::time_point start;
+	high_resolution_clock::time_point end;
+	double run_time;
+	Player(int t):run_time(t){}
+
 int distance(Point p1, Point p2)
 {
 	return (p1.x-p2.x)*(p1.x-p2.x)+(p1.x-p2.y)*(p1.x-p2.y);
@@ -253,7 +285,7 @@ vector<Point> jump_search(Point pt,Board board)
 		for(auto col_offset: col_offsets)
 		{
 			//out of bounds
-			if(((x+row_offset)>=board.board.size()) or ((y+col_offset)< board.board[0].size()))
+			if(((x+row_offset)>=16) or ((y+col_offset)>=16))
 				continue;
 
 			//if it is out of bounds
@@ -272,7 +304,7 @@ vector<Point> jump_search(Point pt,Board board)
                     row_jump_offset = x + 2*row_offset;
                     col_jump_offset = y + 2*col_offset;
 
-                    if (((row_jump_offset) >= board.board.size()) or ((col_jump_offset) >= board.board[0].size()))
+                    if (((row_jump_offset) >= 16) or ((col_jump_offset) >= 16))
                         continue;
 
                     if ((row_jump_offset) < 0 or (col_jump_offset) < 0)
@@ -306,7 +338,7 @@ vector<Point> jump_search(Point pt,Board board)
 						for(auto element: st)
 							jumps.push_back(element);
 
-						for(auto ele:st)
+						for(auto ele:jumps)
 							moves.push_back(ele);
 
 
@@ -328,7 +360,7 @@ vector<Point> step_search(Board board, Point pt)
 	vector<int> col_offsets={-1,0,1};
 	vector<Point> legal_moves;
 
-	if(x>=board.row or y>=board.column)
+	if(x>=16 or y>=16)
 		return legal_moves;
 
 	if(x<0 or y<0)
@@ -343,7 +375,7 @@ vector<Point> step_search(Board board, Point pt)
 		for(auto col_offset: col_offsets)
 		{
 			//out of bounds
-			if(((x+row_offset)>=board.row) or ((y+col_offset)< board.column))
+			if(((x+row_offset)>=16) or ((y+col_offset)>= 16))
 				continue;
 
 			//out of bounds
@@ -421,7 +453,7 @@ double eval_function(Node node)
 					}
 				}
 				if(distanceList.empty())
-					green=-100;
+					green+=-100;
 
 				else{
 					int t=*max_element(distanceList.begin(), distanceList.end());
@@ -440,7 +472,7 @@ double eval_function(Node node)
 					}
 				}
 				if(distanceList.empty())
-					red=-100;
+					red+=-100;
 
 				else{
 					int t=*max_element(distanceList.begin(), distanceList.end());
@@ -471,70 +503,151 @@ double eval_function(Node node)
 
 }
 
-// Moves max_value(Board board,int alpha, int beta, Node node)
-// {
-// 	auto wincheck=detectWin(board);
-// 	Moves best_move=NULL;
-// 	if(winCheck[0]==true or winCheck[1]==true or node.node_depth<=0 or end-start>run_time)
-// 	{
-// 		node.node_value eval_score=eval_function(board,node);
-// 		return Moves(node,best_move);
+Node_Action max_value(double alpha, double beta, Node node)
+{
+	end = high_resolution_clock::now(); 
+	Board b=node.board;
+	vector<bool> winCheck=b.detectWin();
+	vector<Point> player_positions;
+	Moves best_move;
 
-// 	}
-// 	if(node.player == 1)
-//         Vector<Point> player_positions = board.get_green_positions();
-//     else if(player == 2)
-//         Vector<Point> player_positions = board.get_red_positions();
+	chrono::duration<double, std::milli> fp_ms = end - start;
+	if(winCheck[0]==true or winCheck[1]==true or node.node_depth<=0 or fp_ms.count()>run_time*1000)
+	{
+		node.node_value=eval_function(node);
+		return Node_Action(node,best_move);
 
-//     double value=DBL_MIN;
+	}
+	int next_player = node.player, player = node.player;
+	if(node.player == 1)
+        player_positions = b.getGreenPosition();
+    else if(player == 2)
+        player_positions = b.getRedPosition();
 
-//     for(auto p:player_positions)
-//     {
-//     	auto legal_moves=step_search(board,Point(p.x,p.y));
-//     	if(legal_moves.size()==0)
-//     		continue;
+    double value=DBL_MIN;
+    Node return_node = Node(player, b, node.node_depth - 1);
 
-//     	for(auto legal_move:legal_moves)
-//     	{
-//     		auto end = high_resolution_clock::now(); 
-//     		if(end-start>timeLimit)
-//     		{
-//     			best_move=
-//     		}
+    for(auto p:player_positions)
+    {
+    	vector<Point> legal_moves=step_search(b,Point(p.x,p.y));
+    	if(legal_moves.size()==0)
+    		continue;
+
+    	for(auto legal_move:legal_moves)
+    	{
+    		end = high_resolution_clock::now(); 
+    		
+    		std::chrono::duration<double, std::milli> fp_ms = end - start;
+    		if(fp_ms.count()>run_time*1000)
+    		{
+    			return Node_Action(node,best_move);
+    		}
+    		Board board_copy=b;
+    		board_copy.move_piece(legal_move,p);
+    		Node next_node = Node(player, board_copy, node.node_depth - 1);
+    		Node_Action node_action = min_value( alpha, beta, next_node);
+    		Node child = node_action.node;
+    		if(value<child.node_value)
+    			best_move = Moves(p,legal_move);
+
+    		value=max(value,child.node_value);
+    		return_node=next_node;
+    		if (value > beta)
+    		{
+    			return_node.node_value = beta;
+    			return Node_Action(return_node, Moves());
+    		}
+    		beta = min(beta, value);
 
 
-//     	}
+    	}
 
-//     }
+    }
+    return_node.node_value = value;
+    return Node_Action(return_node, best_move);
+}
+Node_Action min_value(double alpha, double beta, Node n)
+{
+		end = high_resolution_clock::now(); 
+    	Board b = n.board;
+    	double value;
+    	vector<bool> winCheck = b.detectWin();
+    	vector<Point> player_positions;
+    	Moves best_move;
+    	chrono::duration<double, std::milli> fp_ms = end - start;
+    	if (winCheck[0] == true || winCheck[1] == true || n.node_depth<=0 || fp_ms.count()>run_time*1000) /////////////////////////////////
+    	{
+    		double eval = eval_function(n);
+    		n.node_value = eval;
+    		return Node_Action(n,best_move);
+    	}
+    	int next_player = n.player, player = n.player;
+    	if(player == 1)
+    		player_positions = b.getGreenPosition();
+    	
+    	else 
+    		player_positions = b.getRedPosition();
+    	
 
-// }
-// void alphaBetaMinimax(Node node)
-// {
-// // 	// def alphaBetaMinimax(self, node):
-// //  //        self.start = time.time()
-// //  //        max_node, best_move = self.maxValue(node, float("-inf"), float("inf"))
-// //  //        data_board = node.get_board()
-// //  //        data_board.move_piece(best_move[0], best_move[1])
-// //  //        print("Took", self.end - self.start, "seconds to choose a move.")
-// //  //        print("Pruned", self.prunes, "branches.")
-// //  //        print("Generated", self.boards, "boards.")
-// //  //        self.prunes = 0
-// //  //        self.boards = 0
-// //  //        data_board.chosenMove = best_move
-// //  //        data_board.changeTurn()
-// //  //        return max_node, best_move
-// //  //        # return the action to do from the state
+    	Node return_node = Node(player, b, n.node_depth - 1);
+    	value = DBL_MAX;
+    	
+    	for(auto p:player_positions)
+    	{
+    		vector<Point> legal_moves = step_search(b,Point(p.x,p.y));
+    		if(legal_moves.size() == 0)
+    			continue;
+    		for(auto legal_move:legal_moves)
+    		{
+    			end = high_resolution_clock::now(); 
+    		
+    			std::chrono::duration<double, std::milli> fp_ms = end - start;
+	    		if(fp_ms.count()>run_time*1000)
+	    		{
+	    			return Node_Action(n,best_move);
+	    		}
+    			Board b_copy = b;
+    			b_copy.move_piece(p,legal_move);
+    			Node next_node = Node(player, b_copy, n.node_depth - 1);
+    			Node_Action bs = max_value(alpha, beta, next_node);
+    			Node child = bs.node;
 
-// 	auto start = high_resolution_clock::now(); 
-// 	Moves m =maxValue(node, DBL_MIN, DBL_MAX);
-// 	Node max_node=m.node;
-// 	Point source=m.source;
-// 	Point destination=m.destination;
-// 	data_board=max_node.board;
-// 	move_piece(source, destination);
-// 	switchTurn();
-// 	return m;
-// }
+    			
+    			b_copy.move_piece(legal_move,p);
+    			
+    			if (value > child.node_value)
+    			{
+    				best_move = Moves(p,legal_move);
+    			}
+    			
+    			value = min(value, child.node_value);
+    			return_node = next_node;
+    			
+    			if (value < alpha)
+    			{
+    				return_node.node_value = value;
+    				return Node_Action(return_node, Moves());
+    			}
+    			alpha = max(alpha, value);
+
+    		}
+    	}
+    	return_node.node_value = value;
+    	return Node_Action(return_node, best_move);
+    }
+Node_Action alphaBetaMinimax(Node node)
+{
+	start = high_resolution_clock::now(); 
+	Node_Action m =max_value(DBL_MIN, DBL_MAX, node);
+	Board data_board=node.board;
+	Node max_node=m.node;
+	Moves move=m.m;
+	Point source=move.source;
+	Point destination=move.destination;
+	data_board.move_piece(source, destination);
+	data_board.switchTurn();
+	return m;
+}
 
 void clear_moves(){
 	moves.clear();
@@ -553,14 +666,15 @@ int main()
 {
 	string game_type, my_color;
 	
-	int play_time;
-	int alpha = INT_MIN, beta = INT_MAX;
+	
+	double alpha = DBL_MIN, beta = DBL_MAX;
 	float run_time;
 
 	ifstream fin;
     fin.open("input.txt");
 
-    fin>>game_type>>my_color>>play_time;
+    fin>>game_type>>my_color>>run_time;
+    
     Board board;
 
     for (int i = 0; i < 16; i++) 
@@ -568,6 +682,13 @@ int main()
             fin>> board.board[i][j];
 
 
+    for(int i=0;i<16;i++)
+    	for(int j=0;j<16;j++)
+    		cout<<board.board[i][j];
+
+    //if(game_type=="SINGLE")
+
+    //else if(game_type=="GAME")
 
 
 return 0;
