@@ -16,7 +16,7 @@ In this project, we will play the game of Halma, an adversarial game with some s
 ## Class Tournament
 
 The final project for this course was structured around creating this
-adversarial AI so that the teams in class could compete in one final tournament
+ AI agent so that the student's bots in class could compete with each other and one with the TA's bot in one final tournament
 on the last day of class.
 
 
