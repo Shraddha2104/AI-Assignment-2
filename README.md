@@ -23,13 +23,13 @@ Our AI worked its way through 4 games of this single-elimination tournament to
 win first place.
 
 ## Motivation
-Simply run by typing gcc -o obj solution.cpp and make sure to cross check the input and output file.
+Simply run by typing gcc -o obj halma.cpp and make sure to cross check the input and output file.
 
 ## Game Images
 
 <p float="left">
-    <img src="images/halma.png" width="290" />
-    <img src="images/halma2.png" width="290" />
+    <img src="halma1.png" width="290" />
+    <img src="halma2.png" width="290" />
   
 </p>
 
