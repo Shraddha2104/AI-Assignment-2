@@ -9,9 +9,10 @@ In this project, we will play the game of Halma, an adversarial game with some s
 
 ## Code Example
 
-hw2-csci561-f19.pdf : contains the assignment description, including the description, and the input and output format specification.
-halma.py : main python code that contains the solution for the assignment
-hw2-addendum.pdf : non spoiling rules for the game
+* **hw2-csci561-f19.pdf** : contains the assignment description, including the description, and the input and output format specification.
+* **halma.py** : main python code that contains the solution for the assignment
+* **hw2-addendum.pdf** : non spoiling rules for the game
+
 
 
 ## Motivation
