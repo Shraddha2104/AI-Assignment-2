@@ -1,4 +1,4 @@
-# AI-Assignment-2- HALMA
+# <img src="deep_red.ico" width="24" height="24" /> Halma AI
 
 ## Synopsis
 
@@ -19,8 +19,6 @@ The final project for this course was structured around creating this
 adversarial AI so that the teams in class could compete in one final tournament
 on the last day of class.
 
-Our AI worked its way through 4 games of this single-elimination tournament to
-win first place.
 
 ## Motivation
 Simply run by typing gcc -o obj halma.cpp and make sure to cross check the input and output file.
