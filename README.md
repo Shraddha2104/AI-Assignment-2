@@ -21,7 +21,7 @@ on the last day of class.
 
 
 ## Motivation
-Simply run by typing gcc -o obj halma.cpp and make sure to cross check the input and output file.
+Simply run by `gcc -o obj halma.cpp` typing and make sure to cross check the input files.
 
 ## Game Images
 
