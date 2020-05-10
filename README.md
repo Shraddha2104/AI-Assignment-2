@@ -26,8 +26,8 @@ Simply run by typing gcc -o obj halma.cpp and make sure to cross check the input
 ## Game Images
 
 <p float="left">
-    <img src="halma1.png" width="290" />
-    <img src="halma2.png" width="290" />
+    <img src="halma1.png" width="290" height="290" />
+    <img src="halma2.png" width="290" height="290"/>
   
 </p>
 
