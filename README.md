@@ -10,7 +10,7 @@ In this project, we will play the game of Halma, an adversarial game with some s
 ## Repository Structure
 
 * **hw2-csci561-f19.pdf** : contains the assignment description, including the description, and the input and output format specification.
-* **halma.py** : main python code that contains the solution for the assignment
+* **halma.cpp** : main cpp code that contains the solution for the assignment
 * **hw2-addendum.pdf** : non spoiling rules for the game
 
 ## Class Tournament
